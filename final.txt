@@ -1,0 +1,23 @@
+create or replace procedure CALCULAR_SIMULACION (tasa in decimal, total_cuotas in integer, valor_prestamo in decimal) is
+  tasa_nominal_mensual decimal;
+  cuota_mensual decimal;
+  n decimal;
+  d decimal;
+  saldo decimal;
+  abono_interes decimal;
+  abono_capital decimal;
+begin
+    delete from AMORTIZACION;
+    tasa_nominal_mensual := ((1+(tasa/100))**(30/365))-1;
+    n := tasa_nominal_mensual*valor_prestamo;
+    d := 1-((1+tasa_nominal_mensual)**(-total_cuotas));
+    cuota_mensual := n/d;
+    saldo := valor_prestamo;
+    
+    for i in 1 .. total_cuotas loop
+      abono_interes := tasa_nominal_mensual*saldo;
+      abono_capital := cuota_mensual-abono_interes;
+      saldo := saldo-abono_capital;
+      insert into AMORTIZACION values (i,cuota_mensual,abono_capital,abono_interes,saldo);
+    end loop;
+end; 
